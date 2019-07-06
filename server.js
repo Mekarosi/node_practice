@@ -52,6 +52,13 @@ app.get('/savedata',(req,res)=>{
 })
 
 
+app.get('/getdata',(req,res)=>{
+  blog.find({'title':'Programming'},(err,doc)=>{
+      return res.json(doc)
+  });
+});
+
+
 
 app.post("/login", (req, res) => {
 const userDetails = req.body;
@@ -90,13 +97,6 @@ user.findOne({email:userDetails.email}, (err, doc) => {
  }
 });
 });
-
-app.get('/getdata',(req,res)=>{
-  blog.find({'title':'somto'},(err,doc)=>{
-      return res.json(doc)
-  });
-});
-
 
 
 
