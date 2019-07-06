@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const Joi = require('@hapi/joi');
 
-app.use(cors());
+
 
 
 
@@ -18,7 +18,7 @@ const scheme = Joi.object().keys({
   fullname: Joi.string().required().min(3).max(20)
 })
 
-
+app.use(cors());
 app.use(express.json());
 mongo.connect("mongodb://127.0.0.1:27017/nesa", err => {
 if (err) {
@@ -53,7 +53,7 @@ app.get('/savedata',(req,res)=>{
 
 
 app.get('/getdata',(req,res)=>{
-  blog.find({'title':'Programming'},(err,doc)=>{
+  blog.find({'title':'Sonto'},(err,doc)=>{
       return res.json(doc)
   });
 });
@@ -107,7 +107,12 @@ app.post("/signup", (req, res) => {
   
   const error = result.error
   const value = result.value
-  
+
+  var userSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true},
+});
+
+
   if(error){
     return res.json(error)
   }
@@ -121,11 +126,18 @@ app.post("/signup", (req, res) => {
   const newUser = new user(userDetails);
   
   newUser.save((err, doc) => {
-   if (err) {
+    if (err) {
      console.log(err);
      return res.send("I got an error");
 
-   } else {
+    } 
+    //prevent Duplicating email address
+     if(userDetails.email === doc.email){
+       return res.send('email taken')
+     }
+    
+
+   else {
      return res.json(doc);
       
    }
