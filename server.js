@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const mongo = require("mongoose");
+const mongo= require("mongoose");
 const cors = require("cors");
 const PORT = 8080;
 const bcrypt = require('bcrypt');
@@ -20,7 +20,8 @@ const scheme = Joi.object().keys({
 
 app.use(cors());
 app.use(express.json());
-mongo.connect("mongodb://127.0.0.1:27017/nesa", err => {
+//mongo.connect("mongodb://127.0.0.1:27017/nesa", err => {
+  mongo.connect("mongodb+srv://mekarosi:assa@cluster0-jiqvx.mongodb.net/test?retryWrites=true&w=majority", err => {
 if (err) {
  console.log("BROKEN");
 
@@ -31,6 +32,24 @@ if (err) {
 
 const blog = require('./models/blog')
 const user = require('./models/users')
+const blogPost = require('./models/blogpost')
+
+
+app.post('/publishpost', (req,res)=>{
+  const blogDetails = req.body
+  const publishpost = new blogPost(
+    {
+      authorName: blogDetails.authorName,
+      publicationTitle: blogDetails.publicationTitle,
+      body: blogDetails.body
+    }
+  )
+  publishpost.save((err,doc)=>{
+    if(err) console.log(err)
+    return res.json(doc)
+  })
+})
+
 
 
 app.get('/savedata',(req,res)=>{
@@ -52,9 +71,10 @@ app.get('/savedata',(req,res)=>{
 })
 
 
-app.get('/getdata',(req,res)=>{
-  blog.find({'title':'Sonto'},(err,doc)=>{
-      return res.json(doc)
+app.get('/getblogs',(req,res)=>{
+  blogPost.find({},(err,arr)=>{
+      if(err) console.log(err)
+      return res.json(arr)
   });
 });
 
@@ -68,7 +88,6 @@ user.findOne({email:userDetails.email}, (err, doc) => {
    return res.send("I got an error");
  } 
  
- else {
 
    if (doc) {
 
@@ -79,36 +98,35 @@ user.findOne({email:userDetails.email}, (err, doc) => {
       })
     }
 
-    else{
+    
     
      return res.json({
        status: false,
        message: 'Wrong password'
      });
-    }
+    
   
-   } else {
+   } 
      // return res.send("No User Matching Details");
      return res.json({
        status: false,
        message: 'No User Matching Details'
      });
-   }
- }
+   
+ 
 });
 });
 
 
 
 app.post("/signup", (req, res) => {
-
   const userDetails = req.body;
-  const result = joi.validate(userDtails,scheme)
+  const result = Joi.validate(userDetails,scheme)
   
   const error = result.error
   const value = result.value
 
-  var userSchema = new mongoose.Schema({
+  var userSchema = new mongo.Schema({
     email: { type: String, required: true, unique: true},
 });
 
