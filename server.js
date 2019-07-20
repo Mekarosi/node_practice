@@ -6,10 +6,26 @@ const PORT = 8080;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const Joi = require('@hapi/joi');
+const jwt = require('jsonwebtoken')
+const mysql = require('mysql');
 
 
 
+const connectionObjection = {
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "assa"
+}
 
+const connection = mysql.createConnection(connectionObjection);
+connection.connect((err)=> {
+  if (err) {
+    console.log('error')
+  } else{
+    console.log('assa worked')
+  }
+})
 
 const scheme = Joi.object().keys({
   username: Joi.string().required().min(3).max(20),
@@ -33,6 +49,42 @@ if (err) {
 const blog = require('./models/blog')
 const user = require('./models/users')
 const blogPost = require('./models/blogpost')
+
+
+app.get('/jobs', (req, res)=> {
+  connection.query('SELECT * FROM `feedback`',(err,results,fields)=>{
+    if(!err) {
+      return res.json({
+        'status': true,
+        'result': results
+      })
+    }
+
+    console.log(err);
+    return res.json({
+      'status': false,
+      'message':'there is error'
+    })
+  })
+})
+
+app.get('/job',(req, res) => {
+  connection.query('SELECT * from `application_master` as am INNER JOIN `feedback` AS fb ON fb.jobseekid = am.jobseekid INNER JOIN `jobseeker_education` AS js ON js.jobseekid= am.jobseekid WHERE am.jobseekid=3', (err,results,fields)=>{
+    if(!err) {
+      return res.json({
+        'status': true,
+        'result': results
+      })
+    } 
+
+    console.log(err);
+    return res.json({
+      'status': false,
+      'message':'not responsing'
+    })
+  })
+})
+
 
 
 app.post('/publishpost', (req,res)=>{
@@ -81,45 +133,22 @@ app.get('/getblogs',(req,res)=>{
 
 
 app.post("/login", (req, res) => {
+console.log(req.body)
 const userDetails = req.body;
 const password = userDetails.password
-user.findOne({email:userDetails.email}, (err, doc) => {
- if (err) {
-   return res.send("I got an error");
- } 
- 
-
-   if (doc) {
-
-    if(bcrypt.compareSync(password, doc.password)){
-      return res.json({
-        status:true,
-        userDetail:doc
-      })
-    }
-
-    
-    
-     return res.json({
-       status: false,
-       message: 'Wrong password'
-     });
-    
-  
-   } 
-     // return res.send("No User Matching Details");
-     return res.json({
-       status: false,
-       message: 'No User Matching Details'
-     });
-   
- 
+user.findOne({email:userDetails.email}, (err, doc) => { 
+if (err) console.log(err)
+if(doc) return res.json({
+  userDetails:doc,
+  status:true
+})
+return res.send('no user found')
 });
 });
-
 
 
 app.post("/signup", (req, res) => {
+  console.log(req.body);
   const userDetails = req.body;
   const result = Joi.validate(userDetails,scheme)
   
@@ -136,6 +165,7 @@ app.post("/signup", (req, res) => {
   }
   
   const password = userDetails.password
+
   const salt = bcrypt.genSaltSync(saltRounds);
   const hash = bcrypt.hashSync(password, salt);
   
@@ -149,14 +179,15 @@ app.post("/signup", (req, res) => {
      return res.send("I got an error");
 
     } 
-    //prevent Duplicating email address
-     if(userDetails.email === doc.email){
-       return res.send('email taken')
-     }
-    
 
    else {
-     return res.json(doc);
+    const token = jwt.sign(doc.toJSON(), 'parish',{
+     expiresIn:'100d'
+   })
+     return res.json({
+       status:true,
+       userDetails:token
+     });
       
    }
   });
