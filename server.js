@@ -8,6 +8,8 @@ const saltRounds = 10;
 const Joi = require('@hapi/joi');
 const jwt = require('jsonwebtoken')
 const mysql = require('mysql');
+const config = require('./node_modules/config')
+const connectDb = require('./config/db')
 
 
 
@@ -36,19 +38,13 @@ const scheme = Joi.object().keys({
 
 app.use(cors());
 app.use(express.json());
-//mongo.connect("mongodb://127.0.0.1:27017/nesa", err => {
-  mongo.connect("mongodb+srv://mekarosi:assa@cluster0-jiqvx.mongodb.net/test?retryWrites=true&w=majority", err => {
-if (err) {
- console.log("BROKEN");
 
-} else {
- console.log("CONNECTED");
-}
-});
 
 const blog = require('./models/blog')
 const user = require('./models/users')
 const blogPost = require('./models/blogpost')
+
+connectDb();
 
 
 app.get('/jobs', (req, res)=> {
