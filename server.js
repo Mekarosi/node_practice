@@ -10,9 +10,9 @@ const jwt = require('jsonwebtoken');
 const mysql = require('mysql');
 const config = require('./node_modules/config');
 const connectDb = require('./config/db');
-const blog = require('./models/blog');
-const user = require('./models/users');
-const blogPost = require('./models/blogpost');
+const blog = require('./models/Blog');
+const user = require('./models/Users');
+const blogPost = require('./models/Blogpost');
 
 app.use(cors());
 app.use(express.json());
@@ -171,7 +171,7 @@ app.post('/signup', (req, res) => {
       return res.send('I got an error');
     } else {
       const token = jwt.sign(doc.toJSON(), 'parish', {
-        expiresIn: '100d'
+        expiresIn: '200d'
       });
       return res.json({
         status: true,
