@@ -106,10 +106,9 @@ app.post('/publishpost', (req, res) => {
 app.get('/savedata', (req, res) => {
   const data = req.query;
   const blogPost = new blog({
-    title: data.title,
-    author: data.author,
+    publicationTitle: data.publicationTitle,
+    authorName: data.authorName,
     body: data.body,
-    comments: 0,
     date: new Date()
   });
 
@@ -118,8 +117,8 @@ app.get('/savedata', (req, res) => {
   });
 });
 
-app.get('/getblogs', (req, res) => {
-  blogPost.find({}, (err, arr) => {
+app.get('/getposts', (req, res) => {
+  blog.find({}, (err, arr) => {
     if (err) console.log(err);
     return res.json(arr);
   });
@@ -171,7 +170,7 @@ app.post('/signup', (req, res) => {
       return res.send('I got an error');
     } else {
       const token = jwt.sign(doc.toJSON(), 'parish', {
-        expiresIn: '200d'
+        expiresIn: '300d'
       });
       return res.json({
         status: true,
