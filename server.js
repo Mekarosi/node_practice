@@ -30,7 +30,7 @@ connection.connect(err => {
   if (err) {
     console.log('error');
   } else {
-    console.log('assa worked');
+    console.log('mysql DB connected');
   }
 });
 
@@ -117,10 +117,13 @@ app.get('/savedata', (req, res) => {
   });
 });
 
-app.get('/getposts', (req, res) => {
-  blog.find({}, (err, arr) => {
-    if (err) console.log(err);
-    return res.json(arr);
+app.post('/getposts', (req, res) => {
+  blog.find({}, (err, doc) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return res.json({ posts: doc });
+    }
   });
 });
 
